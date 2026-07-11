@@ -1,0 +1,20 @@
+# Playtime — Português (pt_PT)
+prefix: '<gradient:#4cc9f2:#4c7ef2>Playtime</gradient> <dark_gray>»</dark_gray> '
+no-permission: '<red>⚠ Sem permissão.</red>'
+reloaded: '<green>✔ Playtime recarregado — registo a ser reconstruído.</green>'
+not-ready: '<yellow>⏳ Ainda estou a ler as estatísticas — tenta daqui a uns segundos.</yellow>'
+invalid-name: '<red>⚠ Nome de jogador inválido.</red>'
+unknown-player: '<red>⚠ Não há registo de nenhum jogador chamado <white><name></white>.</red>'
+console-usage: '<red>⚠ Na consola tens de indicar um jogador: /playtime \<jogador></red>'
+playtime:
+  total: '<white>⏱ <name></white> <dark_gray>—</dark_gray> <gray><time></gray> <dark_gray>(</dark_gray><yellow><hours> h</yellow><dark_gray>)</dark_gray>'
+  rank: '<gray>Posição: <white>#<rank></white> de <total> jogadores</gray>'
+  unranked: '<gray>Posição: ainda sem registo no top.</gray>'
+  session: '<gray>Sessão atual: <aqua><session></aqua></gray>'
+top:
+  header: '<white><bold>⏱ Top horas</bold></white> <dark_gray>—</dark_gray> <gray><total> jogadores</gray>'
+  entry: '<pos> <white><name></white> <dark_gray>—</dark_gray> <gray><time></gray> <dark_gray>(</dark_gray><yellow><hours> h</yellow><dark_gray>)</dark_gray>'
+  footer: '<gray>Página <white><page></white>/<pages></gray>'
+  own-rank: '<gray>A tua posição:</gray> <pos> <gray>(<time>)</gray>'
+  empty: '<yellow>Ainda não há horas registadas.</yellow>'
+  invalid-page: '<red>⚠ Página inválida — usa /tophours \<página>.</red>'

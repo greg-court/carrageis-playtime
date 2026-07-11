@@ -1,0 +1,34 @@
+name: Playtime
+version: '${project.version}'
+main: pt.henrique.playtime.Playtime
+api-version: '1.21'
+description: Playtime tracking straight from the vanilla play_time statistic - no database
+authors:
+  - henrique
+softdepend:
+  - PlayerSettings
+  - PlaceholderAPI
+
+commands:
+  playtime:
+    description: Show a player's playtime
+    usage: /playtime [player]
+  tophours:
+    description: Leaderboard of the players with the most hours
+    usage: /tophours [page]
+    aliases:
+      - toph
+
+permissions:
+  playtime.use:
+    description: Allows using /playtime
+    default: true
+  playtime.top:
+    description: Allows using /tophours
+    default: true
+  playtime.admin:
+    description: Allows /playtime reload
+    default: op
+    children:
+      playtime.use: true
+      playtime.top: true

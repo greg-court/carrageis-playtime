@@ -1,0 +1,15 @@
+# ─── Playtime ───
+# Registo de horas jogadas, lido da estatística vanilla minecraft:play_time.
+# Sem base de dados própria: jogadores online leem-se em memória e os offline
+# de <mundo>/stats/<uuid>.json — o plugin nasce já com o histórico completo.
+
+# Idioma das mensagens: pt_PT ou en_US (ver a pasta lang/). Com o PlayerSettings
+# instalado, cada jogador vê o seu próprio idioma; caso contrário usa-se este.
+locale: pt_PT
+
+# Intervalo (minutos) entre atualizações do cache do leaderboard (mínimo 1)
+refresh-minutes: 5
+
+top:
+  # Entradas por página no /tophours (5 a 25)
+  page-size: 10

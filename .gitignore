@@ -1,0 +1,31 @@
+# Build output
+target/
+build/
+.gradle/
+out/
+bin/
+*.class
+
+# Node (remnants of any old embedded web-panel)
+node_modules/
+package-lock.json
+
+# IDE / tooling
+.idea/
+*.iml
+.vscode/
+.claude/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local / logs
+*.log
+build_output.txt
+dependency-reduced-pom.xml
+run/
+logs/
