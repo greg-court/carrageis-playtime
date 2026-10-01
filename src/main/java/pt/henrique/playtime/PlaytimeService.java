@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.bukkit.Statistic;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -13,10 +12,10 @@ import java.io.File;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * <p>Each cycle: a SYNC pass on the main thread snapshots online players'
  * live ticks and names (in-memory reads, cheap), then hands off to an ASYNC
- * task that scans {@code <mainWorld>/stats/*.json} and {@code usercache.json},
+ * task that scans {@code <level>/players/stats/*.json} and {@code usercache.json},
  * merges (live values win — stats files lag until the server autosaves),
  * sorts and publishes ONE immutable {@link PlaytimeSnapshot} through a
  * volatile reference. Commands read only the snapshot: no I/O on the command
@@ -57,7 +56,7 @@ public final class PlaytimeService {
     private final AtomicBoolean scanning = new AtomicBoolean(false);
     /**
      * Cross-scan cache of names resolved through the offline-player profile
-     * (which may read {@code playerdata/<uuid>.dat}) so that lookup happens
+     * (which may read {@code players/data/<uuid>.dat}) so that lookup happens
      * at most once per UUID, not once per UUID per cycle.
      */
     private final Map<UUID, String> nameCache = new ConcurrentHashMap<>();
@@ -111,16 +110,12 @@ public final class PlaytimeService {
 
     /**
      * One refresh cycle. MAIN THREAD ONLY: reads live statistics and resolves
-     * the world folders here, then does every file touch asynchronously.
-     * Skips the cycle if the previous scan is still running.
+     * the level root here (a plain getter, no filesystem access), then does
+     * every file touch asynchronously. Skips the cycle if the previous scan is
+     * still running.
      */
     public void refreshNow() {
-        List<World> worlds = plugin.getServer().getWorlds();
-        if (worlds.isEmpty()) {
-            plugin.getLogger().warning("No worlds loaded yet - Playtime refresh postponed.");
-            return;
-        }
-        File statsDir = new File(worlds.get(0).getWorldFolder(), "stats");
+        Path levelDir = plugin.getServer().getLevelDirectory();
         File usercache = new File(plugin.getServer().getWorldContainer(), "usercache.json");
 
         Map<UUID, Long> liveTicks = new HashMap<>();
@@ -136,7 +131,7 @@ public final class PlaytimeService {
         try {
             plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    snapshot = scan(statsDir, usercache, liveTicks, liveNames);
+                    snapshot = scan(statsDirectory(levelDir), usercache, liveTicks, liveNames);
                 } catch (Exception e) {
                     plugin.getLogger().severe("Playtime scan failed (previous snapshot kept): " + e);
                 } finally {
@@ -146,6 +141,28 @@ public final class PlaytimeService {
         } catch (Exception e) {
             scanning.set(false); // scheduler rejected the task (shutdown) - don't wedge the flag
         }
+    }
+
+    /**
+     * Resolves the vanilla stats directory. ASYNC ONLY — it probes the
+     * filesystem.
+     *
+     * <p>26.1 moved {@code advancements/}, {@code playerdata/} and
+     * {@code stats/} under {@code players/}, and made
+     * {@code World.getWorldFolder()} point at
+     * {@code <level>/dimensions/minecraft/overworld}, so the old
+     * {@code getWorldFolder() + "/stats"} route resolves to a directory that
+     * cannot exist. {@code Server.getLevelDirectory()} (new in 26.2) returns
+     * the level root, which is where {@code players/stats} lives. The pre-26.1
+     * location is still accepted for a level the server has not migrated.</p>
+     */
+    private static File statsDirectory(Path levelDir) {
+        File current = levelDir.resolve("players").resolve("stats").toFile();
+        if (current.isDirectory()) {
+            return current;
+        }
+        File legacy = levelDir.resolve("stats").toFile();
+        return legacy.isDirectory() ? legacy : current;
     }
 
     /**
@@ -232,7 +249,7 @@ public final class PlaytimeService {
                 continue;
             }
             // Offline-profile lookup (UUID overload — never a web request, but
-            // it may read playerdata/<uuid>.dat). Cached across scans so each
+            // it may read players/data/<uuid>.dat). Cached across scans so each
             // UUID pays for it once, including the "no name" answer.
             String cached = nameCache.computeIfAbsent(uuid, id -> {
                 String name = plugin.getServer().getOfflinePlayer(id).getName();

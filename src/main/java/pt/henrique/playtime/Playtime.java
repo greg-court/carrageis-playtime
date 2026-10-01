@@ -18,8 +18,8 @@ import java.util.Objects;
  * tracks every player's total playtime in ticks — live in memory for online
  * players ({@code Statistic.PLAY_ONE_MINUTE}, the legacy Bukkit name for
  * {@code minecraft:play_time}) and on disk in
- * {@code <mainWorld>/stats/<uuid>.json} for everyone else — so the plugin is
- * born already knowing the full history since the server began.</p>
+ * {@code <level>/players/stats/<uuid>.json} for everyone else — so the plugin
+ * is born already knowing the full history since the server began.</p>
  *
  * <p>{@link PlaytimeService} rebuilds an immutable {@link PlaytimeSnapshot}
  * on a timer: a cheap sync pass snapshots online players, then an async task
