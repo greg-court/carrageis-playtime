@@ -6,7 +6,7 @@
 
     <groupId>pt.henrique</groupId>
     <artifactId>Playtime</artifactId>
-    <version>1.0.0</version>
+    <version>2.1.0-semianarchy.1</version>
     <packaging>jar</packaging>
 
     <name>Playtime</name>
@@ -64,7 +64,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21.11-R0.1-SNAPSHOT</version>
+            <version>26.3.build.140-beta</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -45,7 +45,7 @@ public final class TophoursCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(plugin.msg(sender, "not-ready"));
             return true;
         }
-        List<PlaytimeEntry> sorted = snapshot.sorted();
+        List<PlaytimeEntry> sorted = leaderboard(snapshot);
         if (sorted.isEmpty()) {
             sender.sendMessage(plugin.msg(sender, "top.empty"));
             return true;
@@ -71,7 +71,9 @@ public final class TophoursCommand implements CommandExecutor, TabCompleter {
         Locale numberLocale = plugin.lang().javaLocale(sender);
         // Own rank by UUID — the name index can point at another account
         // sharing the same visible name.
-        PlaytimeEntry own = sender instanceof Player player ? snapshot.byUuid(player.getUniqueId()) : null;
+        PlaytimeEntry own = sender instanceof Player player
+                ? sorted.stream().filter(entry -> entry.uuid().equals(player.getUniqueId())).findFirst().orElse(null)
+                : null;
         boolean ownOnPage = false;
         int from = (page - 1) * pageSize;
         int to = Math.min(from + pageSize, sorted.size());
@@ -99,6 +101,19 @@ public final class TophoursCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /** Filter presentation only; the authoritative snapshot and vanilla statistics stay intact. */
+    private List<PlaytimeEntry> leaderboard(PlaytimeSnapshot snapshot) {
+        List<String> excluded = plugin.getConfig().getStringList("top.excluded-uuids");
+        if (excluded.isEmpty()) return snapshot.sorted();
+        List<PlaytimeEntry> visible = new ArrayList<>();
+        for (PlaytimeEntry entry : snapshot.sorted()) {
+            if (!excluded.contains(entry.uuid().toString())) {
+                visible.add(new PlaytimeEntry(entry.uuid(), entry.name(), entry.ticks(), visible.size() + 1));
+            }
+        }
+        return visible;
+    }
+
     /** {@code #N} colored gold/silver/bronze for the podium, gray otherwise. */
     private static Component position(int rank) {
         TextColor color = switch (rank) {
@@ -117,7 +132,7 @@ public final class TophoursCommand implements CommandExecutor, TabCompleter {
         }
         int pageSize = Math.max(MIN_PAGE_SIZE, Math.min(MAX_PAGE_SIZE,
                 plugin.getConfig().getInt("top.page-size", 10)));
-        int pages = (service.snapshot().sorted().size() + pageSize - 1) / pageSize;
+        int pages = (leaderboard(service.snapshot()).size() + pageSize - 1) / pageSize;
         List<String> out = new ArrayList<>();
         for (int i = 1; i <= Math.min(pages, 10); i++) {
             String suggestion = String.valueOf(i);

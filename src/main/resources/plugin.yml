@@ -1,7 +1,7 @@
 name: Playtime
 version: '${project.version}'
 main: pt.henrique.playtime.Playtime
-api-version: '1.21'
+api-version: "26.3"
 description: Playtime tracking straight from the vanilla play_time statistic - no database
 authors:
   - henrique

@@ -11,5 +11,7 @@ locale: pt_PT
 refresh-minutes: 5
 
 top:
+  # UUIDs omitted from /tophours only; recorded time and /playtime are preserved.
+  excluded-uuids: []
   # Entradas por página no /tophours (5 a 25)
   page-size: 10
